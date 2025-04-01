@@ -19,6 +19,7 @@ return new class extends Migration
             $table->date('date'); // Date of the attendance
             $table->integer('hours_present'); // Number of hours present
             $table->string('week'); // Week of the semester
+        
             $table->foreign('student_id')->references('id')->on('users')->onDelete('cascade'); // Foreign key to 'users' table
             $table->foreign('course_id')->references('id')->on('courses')->onDelete('cascade'); // Foreign key to 'courses' table
             $table->foreign('course_hour_id')->references('id')->on('courses_hours')->onDelete('cascade'); // Foreign key to 'courses_hours' table
