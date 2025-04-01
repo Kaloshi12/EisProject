@@ -16,11 +16,6 @@ class Classroom extends Model
      */
     
 
-    /**
-     * Get the faculty that owns the classroom.
-     */
-    public function faculty()
-    {
-        return $this->belongsTo(Faculty::class);
-    }
+
+ 
 }

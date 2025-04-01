@@ -17,6 +17,6 @@ class GroupClass extends Model
      */
     public function degree()
     {
-        return $this->hasMany(Degree::class);
+        return $this->belongsTo(Degree::class);
     }
 }
