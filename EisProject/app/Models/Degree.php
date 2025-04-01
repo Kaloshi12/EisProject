@@ -24,10 +24,10 @@ class Degree extends Model
      */
     public function user()
     {
-        return $this->hasMany(User::class);
+        return $this->belongsTo(User::class);
     }
     public function groupClass()
     {
-        return $this->hasMany(GroupClass::class);
+        return $this->belongsTo(GroupClass::class);
     }
 }
