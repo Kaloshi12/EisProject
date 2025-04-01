@@ -20,4 +20,7 @@ class Course extends Model
             ->withPivot('final_grade', 'status')
             ->withTimestamps();
     }
+    public function grades(){
+        return $this->hasMany(Grade::class);
+    }
 }

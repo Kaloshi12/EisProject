@@ -24,6 +24,6 @@ class Departments extends Model
      */
     public function faculty()
     {
-        return $this->hasMany(Faculty::class);
+        return $this->belongsTo(Faculty::class);
     }
 }

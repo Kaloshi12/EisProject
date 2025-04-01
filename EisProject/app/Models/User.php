@@ -70,7 +70,7 @@ class User extends Authenticatable implements JWTSubject
      * Get the role that owns the user.
      */ 
     public function role(){
-        return $this->hasMany(Role::class);
+        return $this->belongsTo(Role::class);
     }
     /**
      * Get the degree that owns the user.
