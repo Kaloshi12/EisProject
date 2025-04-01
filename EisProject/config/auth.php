@@ -33,7 +33,7 @@ return [
     ],
 
     'api' => [
-        'driver' => 'jwt', // Use Sanctum for API guard
+        'driver' => 'jwt', // Use jwt for API guard
         'provider' => 'users',
     ],
 ],
