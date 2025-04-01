@@ -1,12 +1,11 @@
 <?php
-
 use App\Http\Middleware\HandleCors;
+use App\Http\Middleware\JwtMiddleware;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
-use PhpParser\Node\Stmt\Echo_;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,16 +16,19 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withBroadcasting(
         __DIR__.'/../routes/channels.php',
-        ['prefix' => 'api', 'middleware' => ['api', 'auth:sanctum']],
+        ['prefix' => 'api', 'middleware' => ['api', 'auth:api']], // ✅ Change auth:sanctum to auth:api
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
+            'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class, // ✅ Ensure JWT is registered
         ]);
         $middleware->statefulApi();
         $middleware->append(HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->renderable(function (Illuminate\Auth\AuthenticationException $e, $request) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        });
     })->create();

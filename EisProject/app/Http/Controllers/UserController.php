@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UserController extends Controller
 {
@@ -109,7 +110,7 @@ class UserController extends Controller
     
         if ($user) {
             $this->service->sendVerificationLink($user);
-            $token = $user->createToken('token')->plainTextToken;
+           $token = auth()->login($user);      
             return response()->json([
                 'message' => 'Successfully created',
                 'user' => $user,

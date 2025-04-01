@@ -34,20 +34,13 @@ class AuthController extends Controller
     }
     $inputs = $validator->validated();
    
-    $user = User::where('email', $inputs['email'])->first();
-
-    if ($user && Hash::check($inputs['password'], $user->password)) {
-        $token = $user->createToken('token')->plainTextToken;
-
+    if($token = Auth::attempt($inputs)){
         return response()->json([
-            'message' => 'success',
-            'user'=>$user,
+            'message' => 'success login',
             'token' => $token,
-            'token_type' => 'bearer',
-           
+            'user' => Auth::user()
         ]);
     }
-
     return response()->json([
         'message' => 'Failed to login. Invalid credentials.'
     ], 401);
@@ -55,9 +48,9 @@ class AuthController extends Controller
 
     
 
-public function logout(Request $request) {
+public function logout() {
 
-    $request->user()->currentAccessToken()->delete();
+   Auth::logout();
     return response()->json([
     'message'=>'success logout'
    ]);
