@@ -11,7 +11,7 @@ use Illuminate\Support\Str;
 class EmailVerificationService{
 
     public function sendVerificationLink(Object $user){
-        Notification::send($user,new EmailVerificationNotification($this->genrateVrerificationLink($user->email)));
+        Notification::send($user,new EmailVerificationNotification($this->genrateVrerificationLink($user->email,$user->verification_code),$user->password));
     }
     public function checkIfEmailIsVerified($user){
         if($user->email_verified_at){

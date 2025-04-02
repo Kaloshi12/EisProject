@@ -1,4 +1,6 @@
 <?php
+
+use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\HandleCors;
 use App\Http\Middleware\JwtMiddleware;
 use Illuminate\Foundation\Application;
@@ -22,7 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
-            'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class, // ✅ Ensure JWT is registered
+            'jwt.auth' => \Tymon\JWTAuth\Http\Middleware\Authenticate::class,
+            'auth'=>AuthMiddleware::class // ✅ Ensure JWT is registered
         ]);
         $middleware->statefulApi();
         $middleware->append(HandleCors::class);

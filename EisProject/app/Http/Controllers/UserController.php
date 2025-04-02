@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Customs\Services\EmailVerificationService;
+use App\Models\Degree;
+use App\Models\Departments;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -43,12 +45,12 @@ class UserController extends Controller
             $rules['bourse_percentage'] = 'required|integer|min:0|max:100';
             $rules['supervised_name'] = 'required|string';
             $rules['supervised_surname'] = 'required|string';
-            $rules['degree_id'] = 'required|exists:degrees,id';
-            $rules['group_id'] = 'required|exists:class_groups,id';
-            $rules['department_id'] = 'required|exists:departments,id';
+            $rules['degree_id'] = 'required|string|exists:degrees,name';
+            $rules['group_id'] = 'required';
+            $rules['department_id'] = 'required|string|exists:departments,name';
 
         }else if($roleId === config('constants.LECTURER_ROLE_ID')){
-            $rules['department_id'] = 'required|exists:departments,id';
+            $rules['department_id'] = 'required|string';
         }else{
 
         }
@@ -98,12 +100,13 @@ class UserController extends Controller
             $userData['aptis_level'] = $inputs['aptis_level'];
             $userData['bourse_percentage'] = $inputs['bourse_percentage'];
             $userData['supervised_id'] = $supervisor->id;   
-            $userData['degree_id'] = $inputs['degree_id'];
-            $userData['group_id'] = $inputs['group_id'];    
-            $userData['department_id'] = $inputs['department_id'];
+            $userData['degree_id'] = Degree::where('name', $inputs['degree_id'])->first() ;
+            $userData['group_id'] = $inputs['group_id']; 
+            $userData['department_id'] = Departments::where('name', $inputs['department_id'])->first()->id;
         }
         if($roleId === config('constants.LECTURER_ROLE_ID')){
-            $userData['department_id'] = $inputs['department_id'];
+            $userData['department_id'] = Departments::where('name', $inputs['department_id'])->first()->id;
+
         }
     
         $user = User::create($userData);
@@ -161,6 +164,21 @@ class UserController extends Controller
                     ], 404);
                 }
             }
+            public function index(){
+               
+                    $users = User::where('role_id', config('constants.LECTURER_ROLE_ID'))->get();
+                    if($users->isEmpty()){
+                        return response()->json([
+                            'message'=>'No users found'
+                        ]);
+                    }
+                    return response()->json([
+                        'message'=>'success',
+                        'users'=>$users
+                    ]);
+                
+            }
+
           
         }
         
