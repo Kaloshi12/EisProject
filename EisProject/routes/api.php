@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\JwtMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -14,4 +15,14 @@ Route::middleware(['auth'])->group(function () {
         return $request->user();
     });
 });
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('/user', function (Request $request) {
+        return response()->json([
+            'user' => $request->user(),
+            'token' => $request->bearerToken(),
+        ]);
+    });
+});
+
 Route::get('users', [UserController::class, 'index']);
