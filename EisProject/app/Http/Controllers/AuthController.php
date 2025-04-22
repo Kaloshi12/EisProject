@@ -23,9 +23,20 @@ use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
+   /**
+ * User Login
+ *
+ * @operationId Login
+ * @tags Authentication
+ */
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            /**
+             * The user's credentials.
+             * @var array{email: string, password: string}
+             * @example {"email": "user@epoka.edu.al", "password": "password123"}
+             */
             'email' => 'required|email',
             'password' => 'required|min:8',
         ]);
@@ -50,6 +61,24 @@ class AuthController extends Controller
         ], 401);
     }
 
+    /**
+     * User Logout
+     *
+     * @operationId Logout
+     * @tags Authentication
+     */
+    /**
+     * @OA\Post(
+     *     path="/api/logout",
+     *     summary="Logout user",
+     *     tags={"Authentication"},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successfully logged out"
+     *     ),
+     * )
+     */
+    
     public function logout(Request $request)
     {
         Auth::logout();

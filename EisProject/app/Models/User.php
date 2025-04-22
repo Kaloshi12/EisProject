@@ -7,14 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+    use HasApiTokens, HasFactory, Notifiable;
 
-   /**
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -31,13 +30,16 @@ class User extends Authenticatable implements JWTSubject
         'gender',
         'blood_group',
         'civil_status',
-        'years_sarted',
+        'year_started',
         'aptis_level',
-        'bourse_percantage',
+        'initial_bourse_percentage',
+        'current_bourse_percentage',
         'verification_code',
         'supervised_id',
         'password',
-        'role_id'
+        'role_id',
+        'department_id',
+        'degree_id'
     ];
 
     /**
@@ -48,7 +50,14 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
-    ];    protected function casts(): array
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
@@ -56,39 +65,73 @@ class User extends Authenticatable implements JWTSubject
         ];
     }
 
-    
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
 
+    /**
+     * Return a key-value array of custom claims.
+     */
     public function getJWTCustomClaims()
     {
         return [];
     }
-    /**
-     * Get the role that owns the user.
-     */ 
-    public function role(){
-        return $this->belongsTo(Role::class);
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id', 'id');
     }
-    /**
-     * Get the degree that owns the user.
-     */
-    public function degree(){
-        return $this->hasMany(Degree::class);   
-}
-    public function groupClass(){
-        return $this->hasMany(GroupClass::class);
+    public function department()
+    {
+        return $this->belongsTo(Departments::class, 'department_id', 'id');
     }
-    public function department(){
-        return $this->hasMany(Departments::class);
+    public function degree()
+    {
+        return $this->belongsTo(Degree::class, 'degree_id', 'id');
     }
     public function courses()
     {
-        return $this->belongsToMany(Course::class, 'user_course')
-            ->withPivot('final_grade', 'status')
-            ->withTimestamps();
+        return $this->belongsToMany(Course::class)->withPivot('role')->withTimestamps();
     }
-   
+    public function lecturersCourses()
+    {
+
+        return $this->courses()->wherePivot('role', 'lecturer');
+    }
+    public function assistantsCourses()
+    {
+        return $this->courses()->wherePivot('role', 'assistant');
+    }
+    public function studentsCourses()
+    {
+        return $this->courses()->wherePivot('role', 'student');
+    }
+
+    public function receivedGrades()
+    {
+        return $this->hasMany(Grade::class, 'student_id');
+    }
+    public function givenGrades()
+    {
+        return $this->hasMany(Grade::class, 'lecture_id');
+    }
+    public function sutendGroup()
+    {
+        return $this->classGroup()->wherePivot('role', 'student');
+
+    }
+    public function payment()
+    {
+        return $this->hasMany(Payment::class);
+    }
+    public function documentRequest()
+    {
+        return $this->hasMany(DocumentRequest::class, 'student_id', 'id');
+    }
 }

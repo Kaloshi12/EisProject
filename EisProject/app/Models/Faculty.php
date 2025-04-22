@@ -6,17 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class Faculty extends Model
 {
+    protected $table = 'faculties';
     protected $fillable = [
         'name',
     ];
+    protected $hidden = [
+        'created_at',
+        'updated_at',
+    ];
 
-    /**
-     * Get the department that owns the faculty.
-     */
-    public function department()
+    public function users()
     {
-        return $this->hasMany(Departments::class);
+        return $this->hasMany(User::class, 'faculty_id', 'id');
     }
-
-    
+    public function departments()
+    {
+        return $this->hasMany(Departments::class, 'faculty_id', 'id');
+    }
 }

@@ -10,17 +10,15 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('payments', function (Blueprint $table) {
+        Schema::create('document_requests', function (Blueprint $table) {
             $table->id();
-            $table->date('date');
-            $table->float('cost_paid');
-            $table->string('iban');
-            $table->string('swift_code');
-            $table->string('currency');
-            $table->text('description');
             $table->unsignedBigInteger('student_id');
+            $table->unsignedBigInteger('document_id');
+            $table->enum('status', ['pending', 'approved', 'paid'])->default('pending');
+            $table->timestamp('requested_at')->useCurrent();
             $table->timestamps();
             $table->foreign('student_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('document_id')->references('id')->on('documents')->onDelete('cascade');
         });
     }
 
@@ -29,6 +27,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('payments');
+        Schema::dropIfExists('document_requests');
     }
 };

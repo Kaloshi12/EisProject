@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,12 +12,15 @@ return new class extends Migration
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
-            $table->string('code')->unique();
+            $table->string('code');
             $table->string('name');
+            $table->unsignedBigInteger('degree_id');
             $table->integer('credits');
-            $table->integer('etc');
-            $table->string('semester');
+            $table->string('etc')->nullable();
+            $table->string('category');
+            $table->integer(column: 'semester');
             $table->timestamps();
+            $table->foreign('degree_id')->references('id')->on('degrees')->onDelete('cascade');
         });
     }
 

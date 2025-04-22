@@ -6,28 +6,26 @@ use Illuminate\Database\Eloquent\Model;
 
 class Degree extends Model
 {
+    protected $table = 'degrees';
     protected $fillable = [
         'name',
-        'degree_type',
+        'department_id',
+    ];
+    protected $hidden = [
+        'created_at',
+        'updated_at',
     ];
 
-    /**
-     * Get the department that owns the degree.
-     */
-    public function department()
+    public function users()
     {
-        return $this->belongsTo(Departments::class);
+        return $this->hasMany(User::class, 'degree_id', 'id');
     }
 
-    /**
-     * Get the user that owns the degree.
-     */
-    public function user()
+    public function departments()
     {
-        return $this->hasMany(User::class);
-    }
-    public function groupClass()
-    {
-        return $this->hasMany(GroupClass::class);
+        return $this->belongsTo(Departments::class, 'department_id', 'id');
+    }   
+    public function payment(){
+        return $this->hasMany(Payment::class);
     }
 }

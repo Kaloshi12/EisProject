@@ -10,6 +10,7 @@ class ClassGroupsSeeder extends Seeder
     public function run()
     {
         $degreeIds = DB::table('degrees')->pluck('id', 'name');
+        dd($degreeIds->keys());
 
         $classGroups = [
             ['name' => 'BA BAF 1 A', 'nr_max_student' => 60, 'degree_id' => $degreeIds['Banking and Finance'], 'year_study' => 1],

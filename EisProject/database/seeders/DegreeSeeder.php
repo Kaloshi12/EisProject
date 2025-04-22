@@ -43,6 +43,7 @@ class DegreeSeeder extends Seeder
             ['name' => 'Master of Science in Political Science and International Relations', 'cost' => 1950.0, 'department_id' => 8, 'is_graduated' => true],
             ['name' => 'Professional Master in Political Science and International Relations', 'cost' => 1950.0, 'department_id' => 8, 'is_graduated' => true],
             ['name' => 'PhD in Political Science and International Relations', 'cost' => 1950.0, 'department_id' => 8, 'is_graduated' => true],
+            ['name' => 'Computer Engineer', 'cost' => 4000.0, 'department_id' => 3, 'is_graduated' => false]
         ]);
     }
 }

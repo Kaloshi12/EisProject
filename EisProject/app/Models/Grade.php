@@ -7,26 +7,26 @@ use Illuminate\Database\Eloquent\Model;
 class Grade extends Model
 {
     protected $fillable = [
-        'student_id',
         'course_id',
+        'student_id',
+        'lecture_id',
         'type',
         'weight',
         'points',
+        'is_seen'
     ];
 
-    /**
-     * Get the user that owns the grade.
-     */
-    public function user()
+    public function student()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'student_id');
+    }
+    public function lecturer()
+    {
+        return $this->belongsTo(User::class, 'lecture_id');
     }
 
-    /**
-     * Get the course that owns the grade.
-     */
     public function course()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Course::class, 'course_id');
     }
 }

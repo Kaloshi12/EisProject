@@ -10,79 +10,103 @@ use Illuminate\Support\Facades\Validator;
 
 class EmailVerifyController extends Controller
 {
-    public function verifyUserEmail(Request $request){
-        $validator = \Illuminate\Support\Facades\Validator::make($request->all(),[
-            'email'=>'required|email',
-            'verification_code'=>'required',
+    /**
+     * Show the email verification form.
+     */
+    public function showVerificationForm()
+    {
+        return view('auth.verify-code');
+    }
+
+    /**
+     * Verify User Email.
+     */
+    public function verifyUserEmail(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+            'verification_code' => 'required|string',
         ]);
-        $inputs = $validator->validated();
-        $user = User::where('email',$inputs['email'])->where('verification_code',$inputs['verification_code'])->first();
-        $token = EmailVerificationToken::where('email',$inputs['email'])->first();
 
-        if($user){
-            if($token->expired_at>=now()){
-                if($user->markEmailAsVerified()){
-                    $token->delete();
-                    $user->update(['verification_code'=>'']);                
-                    return response()->json([
-                        'status'=>'success',
-                        'message'=>'Email has been verified succsessfully'
-                    ]);
-                }else{
-                    return response()->json([
-                        'status'=>'failed',
-                        'message'=>'Email verification failed'
-                    ]);
-                }
-            }else{
-                return response()->json([
-                    'status'=>'failed',
-                    'message'=>'Token expired'
-                ]);
-            }
-
-            }else{
-            return response()->json([
-                'status'=>'failed',
-                'message'=>'User not found'
-            ]);
+        if ($validator->fails()) {
+            return back()->withErrors($validator)->withInput();
         }
-       
-}
 
-    public function setPassword(Request $request){
-        $validator = Validator::make($request->all(),[
-            'current_password'=>'required',
-            'new_password'=>'required|string|min:8|regex:/[A-Z]/|regex:/[a-z]/|regex:/[0-9]/|regex:/[@$!%*?&]/',
-            'confirm_password'=>'required'
+        $inputs = $validator->validated();
+        $user = User::where('email', $inputs['email'])
+                    ->where('verification_code', $inputs['verification_code'])
+                    ->first();
+
+        $token = EmailVerificationToken::where('email', $inputs['email'])->first();
+
+        if (!$user) {
+            return back()->withErrors(['verification_code' => 'Invalid verification code.'])->withInput();
+        }
+
+        if (!$token || $token->expired_at < now()) {
+            return back()->withErrors(['verification_code' => 'Verification code has expired.'])->withInput();
+        }
+
+        // Mark email as verified
+        $user->markEmailAsVerified();
+        $user->update(['verification_code' => null]);
+
+        // Remove used token
+        $token->delete();
+
+        return redirect()->route('email.verified')->with('success', 'Email verified successfully.');
+    }
+
+    /**
+     * Set new password.
+     */
+    public function setPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email|exists:users,email',
+            'current_password' => 'required',
+            'new_password' => [
+                'required', 
+                'string', 
+                'min:8', 
+                'regex:/[A-Z]/', 
+                'regex:/[a-z]/', 
+                'regex:/[0-9]/', 
+                'regex:/[@$!%*?&]/'
+            ],
+            'confirm_password' => 'required|same:new_password',
         ]);
-        $inputs = $validator->validated();
-        $user = User::where('password',Hash::make($inputs['current_password']));
-        if($user){
-                if(password_verify($inputs['new_password'],$inputs['confirm_password'])){
-                     $inputs['new_password'] = bcrypt($inputs['new_password']);
-                    $user->update([
-                        'password'=>$inputs['new_password']
-                         ]);
-                         $token = $user->createToken()->plainTextToken;
-                         return response()->json([
-                            'status'=>'success',
-                            'message'=>'Password is updated successfully',
-                            'user'=>$user,
-                            'token'=>$token
-                         ]);
-            }else{
-                return response()->json([
-                    'status'=>'failed',
-                    'message'=>'Confirm password does not match with new password',
-                 ]);
-            }
-        }else{
+
+        if ($validator->fails()) {
             return response()->json([
-                'status'=>'failed',
-                'message'=>'User not found',
-             ]);
+                'status' => 'failed',
+                'errors' => $validator->errors(),
+            ], 422);
         }
+
+        $inputs = $validator->validated();
+        $user = User::where('email', $inputs['email'])->first();
+
+        if (!$user || !Hash::check($inputs['current_password'], $user->password)) {
+            return response()->json([
+                'status' => 'failed',
+                'message' => 'Current password is incorrect.',
+            ], 401);
+        }
+
+        // Update password
+        $user->update([
+            'password' => Hash::make($inputs['new_password']),
+        ]);
+
+        // Generate a new token for the user
+        $token = $user->createToken('token')->plainTextToken;
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Password updated successfully.',
+            'user' => $user,
+            'token' => $token,
+        ], 200);
     }
 }
-
